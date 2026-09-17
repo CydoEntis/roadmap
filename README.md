@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.png" alt="Roadmap" width="280">
+</p>
+
 # Roadmap
 
 A planning skill for Claude Code (`/roadmap`) and Codex (`$roadmap`), for anything
