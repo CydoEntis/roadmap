@@ -38,23 +38,38 @@ check the plan against reality.
 
 ## Install
 
+Install it from this repo's plugin marketplace. One manifest serves both tools.
+
+**Claude Code**
+
 ```sh
-curl -fsSL https://raw.githubusercontent.com/CydoEntis/roadmap/master/install.sh | sh
+claude plugin marketplace add CydoEntis/roadmap
+claude plugin install roadmap@roadmap
 ```
 
-This clones `master` into `~/.local/share/roadmap` and links it into
-`~/.claude/skills/roadmap` (Claude Code) and `~/.codex/skills/roadmap` (Codex). Run
-it again, or `~/.local/share/roadmap/install.sh`, to update. Every machine runs what
-is on GitHub.
+**Codex**
 
-Nothing else to set up, and nothing your repos are required to add. Claude Code
-sees `/roadmap`; Codex sees `$roadmap`.
+```sh
+codex plugin marketplace add CydoEntis/roadmap
+codex plugin add roadmap@roadmap
+```
 
-**Changing the skill.** Never edit the installed copy; the installer refuses to
-update one with local edits. Work in your own clone, ship by pull request, and run
-the installer after it merges. To try a branch before merging, run
-`ROADMAP_BRANCH=<branch> ./install.sh`, then run plain `./install.sh` to go back to
-`master`.
+Claude Code runs it as `/roadmap`; Codex runs it as `$roadmap`. Nothing your repos
+are required to add.
+
+**Updating**
+
+```sh
+claude plugin marketplace update roadmap && claude plugin update roadmap@roadmap
+codex plugin marketplace upgrade roadmap
+```
+
+Or turn on auto-update for the `roadmap` marketplace in Claude Code's `/plugin`
+menu.
+
+**Releasing a change.** Work on a branch and merge it by pull request. Bump
+`version` in `.claude-plugin/plugin.json` in the same pull request: both tools
+update a plugin only when its version changes.
 
 ## Commands
 
@@ -445,6 +460,8 @@ exit condition holds, it closes the phase and tickets the next one.
 
 ## Contents
 
+The skill itself lives in `skills/roadmap/`; paths below are relative to it, except `.claude-plugin/`.
+
 | File | What it holds |
 |---|---|
 | `SKILL.md` | The commands and the rules every mode shares |
@@ -456,7 +473,7 @@ exit condition holds, it closes the phase and tickets the next one.
 | `references/agent-instructions.md` | The optional Plan section for `AGENTS.md` / `CLAUDE.md` |
 | `references/asking.md` | Which question tool a session has, and its limits |
 | `agents/openai.yaml` | Codex UI metadata |
-| `install.sh` | Installs or updates the skill from GitHub for both tools |
+| `.claude-plugin/` | The plugin and marketplace manifests, read by both Claude Code and Codex |
 
 ## Credits
 

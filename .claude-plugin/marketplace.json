@@ -1,0 +1,16 @@
+{
+  "name": "roadmap",
+  "owner": {
+    "name": "CydoEntis"
+  },
+  "metadata": {
+    "description": "The roadmap planning skill for Claude Code and Codex."
+  },
+  "plugins": [
+    {
+      "name": "roadmap",
+      "source": "./",
+      "description": "Plan software work at any size and keep the plan true."
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "name": "roadmap",
+  "version": "1.1.0",
+  "description": "Plan software work at any size and keep the plan true: one plan doc as the source of truth, ADRs, small tickets, reconcile, and a fast drift check.",
+  "author": {
+    "name": "CydoEntis"
+  },
+  "repository": "https://github.com/CydoEntis/roadmap"
+}
