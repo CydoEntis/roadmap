@@ -124,8 +124,9 @@ asked for. It never lists features you think the product should have.
 - **defer**: worth doing, not now. Recorded with what would bring it back.
 
 Later rounds settle whatever the dispositions opened up: what the first milestone
-must include, how a merge migrates existing data, which decisions need an ADR, and
-any term whose confusion would change what gets built (see "Glossary" in
+must include, how a merge migrates existing data, which decisions need an ADR, what
+must stay true while the work happens (the plan doc's **Rules**: only what a path,
+test or command can show), and any term whose confusion would change what gets built (see "Glossary" in
 `SKILL.md`).
 
 **The step ends when the frontier is empty and the user confirms you share an
@@ -185,7 +186,15 @@ Once the chain is approved, show the drafts, then write:
   [references/adr.md](references/adr.md);
 - the glossary entries settled in step 2;
 - the doc fixes from step 1, and links from the scope-only files to the plan doc,
-  **only as the user approved them**.
+  **only as the user approved them**;
+- the **plan section of the agent instructions**, offered as
+  [references/agent-instructions.md](references/agent-instructions.md) describes.
+  It is what makes coding agents in Claude Code and Codex read the plan doc first and
+  stop at a conflict. Offer it; if the user declines, the plan still works.
+
+**The plan doc is the hub from the start.** Every ADR written here has a Decisions
+line saying what it rules out; every scope-only file, ADR the repo already had, and
+the glossary are linked; nothing is copied in.
 
 ## 5 — Ticket
 

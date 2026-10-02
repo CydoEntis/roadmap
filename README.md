@@ -39,13 +39,22 @@ check the plan against reality.
 ## Install
 
 ```sh
-git clone git@github.com:CydoEntis/roadmap.git ~/personal/roadmap
-ln -s ~/personal/roadmap ~/.claude/skills/roadmap    # Claude Code
-ln -s ~/personal/roadmap ~/.codex/skills/roadmap     # Codex
+curl -fsSL https://raw.githubusercontent.com/CydoEntis/roadmap/master/install.sh | sh
 ```
 
-Nothing else to set up, and nothing to add to your repos. Claude Code sees
-`/roadmap`; Codex sees `$roadmap`.
+This clones `master` into `~/.local/share/roadmap` and links it into
+`~/.claude/skills/roadmap` (Claude Code) and `~/.codex/skills/roadmap` (Codex). Run
+it again, or `~/.local/share/roadmap/install.sh`, to update. Every machine runs what
+is on GitHub.
+
+Nothing else to set up, and nothing your repos are required to add. Claude Code
+sees `/roadmap`; Codex sees `$roadmap`.
+
+**Changing the skill.** Never edit the installed copy; the installer refuses to
+update one with local edits. Work in your own clone, ship by pull request, and run
+the installer after it merges. To try a branch before merging, run
+`ROADMAP_BRANCH=<branch> ./install.sh`, then run plain `./install.sh` to go back to
+`master`.
 
 ## Commands
 
@@ -58,10 +67,12 @@ Nothing else to set up, and nothing to add to your repos. Claude Code sees
 
 /roadmap init              once per project: create the plan
 /roadmap reconcile         is the plan still true? did a phase finish?
+/roadmap check [target]    quick: does this work break the plan?
 ```
 
 **The rule: no plan yet → `init`. Want something built → name its type, or `add` if
-you're not sure. Is the plan still true → `reconcile`.**
+you're not sure. Is the plan still true → `reconcile`. About to start or ship some
+work → `check`.**
 
 Size doesn't pick the command. `/roadmap bug a paste drops the link text` is
 probably three small tickets; `/roadmap feature sync across devices` becomes a new
@@ -80,6 +91,30 @@ phase in the plan. Both go through the same five steps:
 phases → plan doc → tickets for the first phase. `reconcile` runs it backwards:
 it re-reads the plan against the code, tracker and history, fixes what disagrees,
 and opens the next phase when the current one is done.
+
+### Keeping drift out while you work
+
+`reconcile` is the full audit, but it runs between phases. Three things keep the
+plan true in between:
+
+- **One hub.** The plan doc links every ADR, intent, spec, the glossary and every
+  open ticket, and copies none of them. Each decision line says what it rules out,
+  and a **Rules** section lists what the code must keep true, each with where to
+  check it.
+- **Same-step updates.** Any command that writes or changes one of those records
+  updates the plan doc in the same approved change. Nothing is left for later.
+- **`check`.** A read-only look, in seconds, at a ticket, a branch or a described
+  change: does it cross a decision, break a rule, build something under Out, or add
+  scope the plan doesn't have? It writes nothing, and names which command fixes each
+  conflict. It also checks any edits made to the plan doc since the last reconcile,
+  so you're free to edit the plan doc by hand: run `check` after you do.
+- **Hub lines are checked before they're written.** A new rule is run against the
+  code first; if the code doesn't keep it yet, it's marked `not yet: <ticket>`
+  instead of written as true.
+
+`init` also offers a short **Plan** section for your `AGENTS.md` / `CLAUDE.md`, so
+coding agents in either tool read the plan doc first and stop at a conflict instead
+of picking a side. It's optional.
 
 ## A session, start to finish
 
@@ -133,13 +168,14 @@ scratch file) are cleaned up.
 
 ### The plan doc — `docs/PLANNING.md`
 
-One file: what's in, what's out, and the order. It links to tickets rather than
-repeating them.
+One file: what's in, what's out, the order, and what must stay true. It's the hub:
+it links every ticket, ADR and feature doc rather than repeating them.
 
 ```markdown
 # Plan: Harbor
 
-Source of truth for scope and order. Tickets hold the detail.
+Source of truth for scope, order, decisions and rules. Tickets hold the detail.
+Read this before starting work. If work conflicts with it, stop and say so.
 Last reconciled: 2026-09-17 at `47b67dc` on `dev`.
 Verify: `bash tests/run`
 
@@ -176,7 +212,15 @@ Open decisions:
   night is left running.
 
 ## Decisions
-- [ADR-0001](docs/adr/0001-harbor-starts-runs.md) — Harbor starts Tugboat runs
+- [ADR-0001](docs/adr/0001-harbor-starts-runs.md) — Harbor starts Tugboat runs.
+  Rules out: a second process launching runs
+
+## Rules
+- Only `hbr run` starts a run — `rg -n 'tug run' src` matches only `src/run.sh` — ADR-0001
+
+## Records
+Glossary: [CONTEXT.md](CONTEXT.md)
+Feature docs: `docs/features/`. Each live intent is linked from In scope or a phase.
 
 ## Rework
 - 2026-09-17 #31 → #35: planning gap, the empty case was never asked → AGENTS.md
@@ -365,6 +409,17 @@ If most of the duplication is already gone, it says so, with the commit that did
 and asks whether the leftovers are the work. If the leftovers change what users see,
 it tells you it isn't a task after all.
 
+**Before starting a ticket**
+
+```
+/roadmap check #52
+```
+
+It reads the plan doc and only what the ticket touches, then answers in one line
+("Clear") or with a short table: the plan's line, what the work does, the evidence,
+and which command fixes it. It writes nothing. An unattended agent that runs it
+stops the ticket on a conflict instead of choosing.
+
 **Checking a plan**
 
 ```
@@ -393,13 +448,15 @@ exit condition holds, it closes the phase and tickets the next one.
 | File | What it holds |
 |---|---|
 | `SKILL.md` | The commands and the rules every mode shares |
-| `init.md`, `add.md`, `reconcile.md` | The method for each mode |
+| `init.md`, `add.md`, `reconcile.md`, `check.md` | The method for each mode |
 | `references/plan-doc.md` | The plan doc's shape and its upkeep rules |
 | `references/intent.md`, `spec.md` | Feature docs |
 | `references/adr.md` | ADR shape and supersession |
 | `references/ticket.md` | The ticket checklist, the size check, and the body |
+| `references/agent-instructions.md` | The optional Plan section for `AGENTS.md` / `CLAUDE.md` |
 | `references/asking.md` | Which question tool a session has, and its limits |
 | `agents/openai.yaml` | Codex UI metadata |
+| `install.sh` | Installs or updates the skill from GitHub for both tools |
 
 ## Credits
 

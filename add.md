@@ -24,7 +24,8 @@ below.
 know where tickets live. Then, **before the first question, go and look.** Search for
 this surface in:
 
-- the planning set (see `SKILL.md`);
+- the planning set (see `SKILL.md`), the plan doc's **Decisions** ("Rules out")
+  and **Rules** lines first;
 - open tickets, in the place "Where tickets live" pointed to. If you can't search
   there from this session, say so;
 - open pull requests and recent branches.
@@ -35,6 +36,9 @@ round:
 - **It is under Out.** It was declined, with a date and a reason. Show that. Taking
   it back is the user's decision, and becomes a change to the plan.
 - **It is under Later.** Promoting it now is a decision; ask.
+- **It crosses a decision or a rule.** An active ADR rules it out, or it would break
+  a line under Rules. Show which. Going ahead means superseding the ADR or changing
+  the rule, which makes it a change, and that is the first question.
 - **A live intent covers it.** Don't start a second one. Ask whether to extend or
   supersede it.
 - **Open tickets cover part of it.** Say how many there are and how long they have
@@ -181,6 +185,10 @@ truth.
     phase, or insert a phase before it. Never slip it in quietly.
 - **Declined or deferred along the way** → Out or Later, with the date and the
   reason. If the repo already keeps such a list somewhere, add it there.
+- **Records from steps 2 and 3** go on the hub in the same change (see "Every record
+  lands on the hub in the same step" in `SKILL.md`): the intent and spec linked, each
+  ADR on Decisions with what it rules out, any new Rules line, and any superseded
+  ADR's line removed.
 
 ## 5 — Ticket
 

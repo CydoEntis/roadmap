@@ -1,6 +1,6 @@
 ---
 name: roadmap
-description: Plans software work at any size and keeps the plan true. The bug, feature, change and task commands (or add, to have the type worked out) plan one piece of work — overlap check, questions until nothing is open, an intent and spec where needed, placement in the plan, and small tickets an unattended agent can finish. init (once per project) audits the repo, settles keep / merge / decline / defer, records costly decisions as ADRs, and writes one plan doc with ordered phases, of which only the active one gets tickets. reconcile checks the plan against code, history and tracker. Triggers on "/roadmap", "$roadmap", "/roadmap bug", "/roadmap feature", "/roadmap change", "/roadmap task", "plan this feature", "I want to build X", "make tickets for", "break this down", "grill me", "interview me", "plan the project", "what's left for MVP", "what phase are we in", "the plan is stale".
+description: Plans software work at any size and keeps the plan true. The bug, feature, change and task commands (or add, to have the type worked out) plan one piece of work — overlap check, questions until nothing is open, an intent and spec where needed, placement in the plan, and small tickets an unattended agent can finish. init (once per project) audits the repo, settles keep / merge / decline / defer, records costly decisions as ADRs, and writes one plan doc with ordered phases, of which only the active one gets tickets. reconcile checks the plan against code, history and tracker. check is a fast read-only look at whether current work breaks the plan. Triggers on "/roadmap", "$roadmap", "/roadmap bug", "/roadmap feature", "/roadmap change", "/roadmap task", "/roadmap check", "does this break the plan", "plan this feature", "I want to build X", "make tickets for", "break this down", "grill me", "interview me", "plan the project", "what's left for MVP", "what phase are we in", "the plan is stale".
 ---
 
 # Roadmap
@@ -25,7 +25,8 @@ treats the plan as a claim to be checked.
 ## Modes
 
 **The rule: no plan yet → `init`. Want something built → name its type, or `add`
-if you're not sure. Is the plan still true → `reconcile`.**
+if you're not sure. Is the plan still true → `reconcile`. About to start or ship
+some work → `check`.**
 
 ```
 /roadmap bug <thing>       something broke
@@ -36,6 +37,7 @@ if you're not sure. Is the plan still true → `reconcile`.**
 
 /roadmap init              once per project: create the plan
 /roadmap reconcile         is the plan still true? did a phase finish?
+/roadmap check [target]    quick: does this work break the plan?
 ```
 
 Any size works with the first five. A single broken behaviour is usually a few
@@ -46,6 +48,7 @@ small tickets; a large new capability usually becomes a new phase.
 | **`init`** | Creates the project's plan: a baseline, keep / merge / decline / defer, phases with exit conditions, and tickets for the first phase. **Runs once per project.** Once a plan exists, new work of any size goes through `add`, never through `init` again. → read `init.md` |
 | **`bug`, `feature`, `change`, `task`, `add` + `<thing>`** | Plan one piece of work into the project: overlap check, type and size, an intent (and a spec when design is involved), placement, tickets. All five run the same method. The first four name the type; `add` has it worked out. Work bigger than a phase becomes one or more new phases in the plan (in a repo with no plan, it starts `init`). → read `add.md` |
 | **`reconcile`** | Checks the plan against the code, history and tracker, resolves every mismatch, reviews rework, and, when a phase has finished, opens the next one. → read `reconcile.md` |
+| **`check` + `[target]`** | A read-only look, in seconds, at whether one ticket, branch or described change breaks the plan: a decision, a rule, the Out list, the phase order. Writes nothing; names the command that fixes each conflict. Safe for an unattended agent to run before a ticket. → read `check.md` |
 
 **Read the matching file in this skill's directory and follow it.** This page holds
 the rules every mode shares; the method is in the file. Below, **`add` stands for
@@ -61,7 +64,9 @@ a plan switches to `reconcile`, even when that plan is vague or badly out of dat
 ## What this skill owns
 
 **Owns:** scope (in / out / later), phase order and exit conditions, intents and
-specs, ADRs, the glossary, and tickets for the active phase.
+specs, ADRs, the rules the code must keep, the glossary, tickets for the active
+phase, and the plan section of the repo's agent instructions (offered, never
+required).
 
 **Does not own:** implementation, running tickets, or grading finished work. You end
 at "the plan and the tickets exist." **Never write code**, not even a stub or a spike.
@@ -89,6 +94,7 @@ Every run has a **path**:
   README and agent instructions state) and what already exists.
 - **`reconcile`**: what the planning set claims, and what changed since it was last
   checked.
+- **`check`**: the one target named, against the plan.
 
 Everything you read, ask, write and propose serves that path, and nothing else. Any
 codebase is full of things that could be better. Noticing them is cheap; chasing
@@ -206,6 +212,32 @@ says yes, and stage only the files you wrote, by name.
 and no filing. Do the questioning and approvals there, then show the final drafts
 and ask the user to leave Plan mode so you can write and file what they approved.
 
+### Every record lands on the hub in the same step
+
+The plan doc is the hub (see [references/plan-doc.md](references/plan-doc.md)): every
+ADR, intent, spec, glossary and open ticket for the project is linked from it, and
+none is copied into it. **Drift starts in the gap between writing a record and
+updating the hub**, so there is no gap:
+
+- Any run that writes or changes one of those records shows the matching hub line
+  in the **same** approval, and writes both together. A new ADR comes with its
+  Decisions line (including what it rules out); a superseded one comes with its line
+  removed. A new intent or spec comes with its link. A filed ticket comes with its
+  place in a phase. A closed or reworded ticket comes with any line that named it.
+- A decision that leaves something that must stay true, and that a path, test or
+  command can show, comes with a **Rules** line.
+- **A hub line is a claim, so check it before showing it.** Run a new Rules line's
+  check against the base branch. If the code already breaks it, show the evidence
+  and let the user pick: mark it `not yet: <ticket>` with the ticket that makes it
+  true, or drop it. Never write a rule as holding when it doesn't. Check a new
+  Decisions line's "Rules out" against the open tickets and the In-scope lines, and
+  show any that it would contradict in the same approval.
+- With no plan doc, the same applies to each file in the set that holds scope or
+  order.
+
+A run is not finished while a record it touched is missing from the hub. Writing
+the hub lines doesn't move the stamp; only a full check against the code does.
+
 ### Only the active phase has tickets
 
 Later phases get an outcome and a list of open decisions. A ticket written two
@@ -236,7 +268,8 @@ A ticket may carry a **stated assumption**, never a gap.
 
 ## Repo facts every run needs
 
-Settle these first, and state each one with where it came from.
+Settle these first, and state each one with where it came from. (`check` needs only
+the base branch.)
 
 **Base branch**, in order of preference: the plan doc's stamp; the config of any tool
 that works tickets or runs CI (a `base` field, a workflow's target branch); agent
@@ -289,7 +322,8 @@ the agent instructions and `README`, then checking for `ROADMAP.md`, `PLANNING.m
 list of work. Scope-only files (a declines list, a decision log) are not a plan.
 **The repo has a plan** when at least one file sets order.
 
-**The plan doc** is the file that is declared the source of truth for scope and order,
+**The plan doc** is the file that is declared the source of truth for scope and order
+(and, once it has them, decisions and rules),
 by its own text or by the agent instructions. A file name alone doesn't make one: a
 `PLANNING.md` that only describes how to write tickets is a contract, not the plan
 doc.
