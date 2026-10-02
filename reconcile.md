@@ -80,6 +80,9 @@ and look for these mismatches in particular:
 | **Contradicts a decision** | An open ticket asks for something an active ADR ruled out or replaced. |
 | **Order broken** | A ticket merged before its blocker; a blocker the executor can never see, so the ticket waits forever; tickets for a phase that is not active (unless the repo's contract allows it). |
 | **Orphan ticket** | An open ticket for this project that no file in the set links. |
+| **Not on the hub** | An ADR, intent, spec or glossary that the plan doc doesn't link; a Decisions line missing what its ADR rules out; a superseded ADR still listed. |
+| **Rule broken** | A line under Rules no longer holds on the base branch: the path, test or command it names shows otherwise. A `not yet: <ticket>` rule is broken only once that ticket's change is on the base branch; if it holds by then, drop the marker. |
+| **Agents not pointed** | The agent instructions (`AGENTS.md`, `CLAUDE.md`) don't point at the plan doc, point at the wrong file, or the two disagree. Only a finding if the user accepted the section before; otherwise offer it once (see [references/agent-instructions.md](references/agent-instructions.md)). |
 | **Feature drift** | An intent or spec changed after its tickets were filed, but the tickets didn't; a spec requirement no ticket covers; an accepted intent whose tickets have all closed but which isn't marked done. |
 | **Red base** | The verify command fails on the base branch. |
 
@@ -119,9 +122,10 @@ the stamp.
 Split the table in two.
 
 - **Mechanical.** One right answer: close a ticket whose change has merged; close a
-  ticket that contradicts an active ADR (cite the ADR); fix a broken link; update a
-  status the evidence settles. These need approval, not a question.
-- **Judgement.** The fix depends on what the user wants. Was the removal intended?
+  ticket that contradicts an active ADR (cite the ADR); fix a broken link; add a
+  missing hub link; update a status the evidence settles. These need approval, not a question.
+- **Judgement.** The fix depends on what the user wants. Was the rule broken on
+  purpose (change the rule) or by mistake (a ticket)? Was the removal intended?
   Does the unplanned change belong in this phase, or come back out? Is the stale ADR
   superseded, or is the code fixed?
 
